@@ -39,7 +39,6 @@ public class Alarm {
 		while (!pQ.isEmpty() && pQ.peek().wakeTime <= time){
 			KThread toWake = pQ.poll().thread;
 			toWake.ready();
-
 		}
 		KThread.currentThread().yield();
 		Machine.interrupt().restore(stat);
@@ -95,7 +94,7 @@ public class Alarm {
 	// Add Alarm testing code to the Alarm class
 
 	public static void alarmTest1() {
-		int durations[] = {1000, 10*1000, 100*1000};
+		int durations[] = {-1, 0, 1000, 10*1000, 100*1000};
 		long t0, t1;
 
 		for (int d : durations) {
@@ -124,6 +123,16 @@ public class Alarm {
 	 * @param thread the thread whose timer should be cancelled.
 	 */
         public boolean cancel(KThread thread) {
-		return false;
-	}
+			for (ThreadQueueObject i : pQ) {
+				if (i.thread == thread) {
+					pQ.remove(i);
+					boolean stat = Machine.interrupt().disable();
+					thread.ready();
+					Machine.interrupt().restore(stat);
+					return true;
+				}
+			}
+
+			return false;
+		}
 }

@@ -433,6 +433,8 @@ public class KThread {
 		joinTestMultipleJoinOnChild();
 		//System.out.println("testing self join");
 		//joinTestOnSelf();
+		System.out.println("testing indepedent joins");
+		joinTestIndepedent();
 	}
 	// Place Join test code in the KThread class and invoke test methods
 	// from KThread.selfTest().
@@ -503,7 +505,25 @@ public class KThread {
 	}
 
 	private static void joinTestIndepedent(){
-		return;
+		KThread child1 = new KThread( new Runnable () {
+			public void run() {
+				for (int i = 0; i < 2; i++)
+					System.out.println("I (heart) Nachos outside!");
+				KThread child2 = new KThread( new Runnable () {
+					public void run() {
+						for (int i = 0; i < 2; i++)
+							System.out.println("I (heart) Nachos inside!");
+					}
+				});
+				child2.setName("child2").fork();
+				child2.join();
+				System.out.println("After joining, child2 should be finished.");
+				System.out.println("is it? " + (child2.status == statusFinished));
+				Lib.assertTrue((child2.status == statusFinished), " Expected child1 to be finished.");
+			}
+		});
+		boolean stat = Machine.interrupt().disable();
+		child1.setName("child1").fork();
 	}
 
 	//Test if currentThread calls join on itself
